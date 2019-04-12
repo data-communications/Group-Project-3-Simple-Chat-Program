@@ -69,8 +69,11 @@ def rect():
         forward(50)
         time.sleep(2)
         rotate(90)
-        time.sleep(2)
+        time.sleep(1)
         forward(100)
+        time.sleep(2)
+        rotate(90)
+        time.sleep(1)
 
 while True: 
 
