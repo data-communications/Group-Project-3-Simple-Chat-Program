@@ -45,15 +45,32 @@ print ('end -- quit demo.\r\n')
 recvThread = threading.Thread(target=recv)
 recvThread.start()
 
+def speed(s):
+    fast = ("speed "+str(s)).encode(encoding="utf-8")
+    sock.sendto(fast, tello_address)
+    print(f"speed set {s}")
 
-def forward(d,s):
-        fast = ("speed "+str(s)).encode(encoding="utf-8")
-        sock.sendto(fast, tello_address)
-        move = ("forward "+str(d)).encode(encoding="utf-8")
-        sock.sendto(move, tello_address)
-        print(f"\nflying... ({d}cm {s}cm/s)")
+def forward(d):
+    move = ("forward "+str(d)).encode(encoding="utf-8")
+    sock.sendto(move, tello_address)
+    print(f"flying forward... {d}")
 
+def rotate(r):
+    rotation = ("cw "+str(r)).encode(encoding="utf-8")
+    sock.sendto(rotation, tello_address)
 
+def forwardWithSpeed(d,s):
+    speed(s)
+    forward(d)
+
+def rect():
+    speed(25)
+    for x in range(2):
+        forward(50)
+        time.sleep(2)
+        rotate(90)
+        time.sleep(2)
+        forward(100)
 
 while True: 
 
@@ -68,7 +85,7 @@ while True:
             print(distance + " cm")
             speed = input("How fast? (10-100cm/s) \n")
             print(speed + " cm/s")
-            forward(distance, speed)
+            forwardWithSpeed(distance, speed)
 
         if 'f1' in msg:
             forward(100,10);
@@ -84,8 +101,9 @@ while True:
             sock.close()
             break
 
-        msg = msg.encode(encoding="utf-8")
-        sent = sock.sendto(msg, tello_address)
+        if 'command' or 'forward' in msg:
+            msg = msg.encode(encoding="utf-8")
+            sent = sock.sendto(msg, tello_address)
 
     except KeyboardInterrupt:
         print ('\n . . .\n')
