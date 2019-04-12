@@ -5,16 +5,14 @@
 #
 # 1/1/2018
 
-import threading 
+import threading
 import socket
 import sys
 import time
 
-
 host = '192.168.10.2'
 port = 9000
-locaddr = (host,port) 
-
+locaddr = (host, port)
 
 # Create a UDP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -23,45 +21,50 @@ tello_address = ('192.168.10.1', 8889)
 
 sock.bind(locaddr)
 
+
 def recv():
     count = 0
-    while True: 
+    while True:
         try:
             data, server = sock.recvfrom(1518)
             print(data.decode(encoding="utf-8"))
         except Exception:
-            print ('\nExit . . .\n')
+            print('\nExit . . .\n')
             break
 
 
-print ('\r\n\r\nTello Python3 Demo.\r\n')
+print('\r\n\r\nTello Python3 Demo.\r\n')
 
-print ('Tello: command takeoff land flip forward back left right \r\n       up down cw ccw speed speed?\r\n')
+print('Tello: command takeoff land flip forward back left right \r\n       up down cw ccw speed speed?\r\n')
 
-print ('end -- quit demo.\r\n')
+print('end -- quit demo.\r\n')
 
-
-#recvThread create
+# recvThread create
 recvThread = threading.Thread(target=recv)
 recvThread.start()
 
+
 def speed(s):
-    fast = ("speed "+str(s)).encode(encoding="utf-8")
+    fast = ("speed " + str(s)).encode(encoding="utf-8")
     sock.sendto(fast, tello_address)
     print(f"speed set {s}")
 
+
 def forward(d):
-    move = ("forward "+str(d)).encode(encoding="utf-8")
+    move = ("forward " + str(d)).encode(encoding="utf-8")
     sock.sendto(move, tello_address)
     print(f"flying forward... {d}")
 
+
 def rotate(r):
-    rotation = ("cw "+str(r)).encode(encoding="utf-8")
+    rotation = ("cw " + str(r)).encode(encoding="utf-8")
     sock.sendto(rotation, tello_address)
 
-def forwardWithSpeed(d,s):
+
+def forwardWithSpeed(d, s):
     speed(s)
     forward(d)
+
 
 def rect():
     speed(25)
@@ -75,7 +78,8 @@ def rect():
         rotate(90)
         time.sleep(1)
 
-while True: 
+
+while True:
 
     try:
         msg = input("")
@@ -91,24 +95,26 @@ while True:
             forwardWithSpeed(distance, speed)
 
         if 'f1' in msg:
-            forward(100,10);
+            forward(100, 10)
 
         if 'f2' in msg:
-            forward(100,50);
+            forward(100, 50)
 
         if 'f3' in msg:
-            forward(100,100);
+            forward(100, 100)
+
+        if 'rectangle' in msg:
+            rect()
 
         if 'end' in msg:
-            print ('...')
+            print('...')
             sock.close()
             break
 
-        if 'command' or 'forward' in msg:
-            msg = msg.encode(encoding="utf-8")
-            sent = sock.sendto(msg, tello_address)
+        msg = msg.encode(encoding="utf-8")
+        sent = sock.sendto(msg, tello_address)
 
     except KeyboardInterrupt:
-        print ('\n . . .\n')
-        sock.close()  
+        print('\n . . .\n')
+        sock.close()
         break
