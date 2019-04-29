@@ -11,7 +11,7 @@ import sys
 import time
 
 host = '192.168.10.2'
-port = 9000
+port = 8888
 locaddr = (host, port)
 
 # Create a UDP socket
@@ -49,70 +49,80 @@ def speed(s):
     sock.sendto(fast, tello_address)
     print(f"speed set {s}")
 
-
 def forward(d):
-    move = ("forward " + str(d)).encode(encoding="utf-8")
-    sock.sendto(move, tello_address)
+    d = ("forward " + str(d)).encode(encoding="utf-8")
+    sock.sendto(d, tello_address)
     print(f"flying forward... {d}")
 
-
 def rotate(r):
-    rotation = ("cw " + str(r)).encode(encoding="utf-8")
-    sock.sendto(rotation, tello_address)
-
+    sock.sendto(("ccw " + str(r)).encode(encoding="utf-8"), tello_address)
+    print(f"rotating counterclockwise {r} degrees")
 
 def forwardWithSpeed(d, s):
     speed(s)
+    time.sleep(3)
     forward(d)
 
-
-def rect():
-    speed(25)
+def rectangle():
     for x in range(2):
-        forward(50)
-        time.sleep(2)
-        rotate(90)
-        time.sleep(1)
-        forward(100)
-        time.sleep(2)
-        rotate(90)
-        time.sleep(1)
-
+        sock.sendto("forward 50".encode(encoding="utf-8"), tello_address)
+        time.sleep(6)
+        sock.sendto("ccw 90".encode(encoding="utf-8"), tello_address)
+        time.sleep(3)
+        sock.sendto("forward 100".encode(encoding="utf-8"), tello_address)
+        time.sleep(8)
+        sock.sendto("ccw 90".encode(encoding="utf-8"), tello_address)
+        time.sleep(3)
 
 while True:
 
     try:
         msg = input("")
 
+
         if not msg:
             break
 
         if 'forward' in msg:
-            distance = input("How far? (20-500cm) \n")
-            print(distance + " cm")
-            speed = input("How fast? (10-100cm/s) \n")
-            print(speed + " cm/s")
-            forwardWithSpeed(distance, speed)
-
-        if 'f1' in msg:
-            forward(100, 10)
-
-        if 'f2' in msg:
-            forward(100, 50)
-
-        if 'f3' in msg:
-            forward(100, 100)
+            forwardWithSpeed(100, 25)
+            time.sleep(7)
+            forwardWithSpeed(100, 50)
+            time.sleep(7)
+            forwardWithSpeed(100, 100)
 
         if 'rectangle' in msg:
-            rect()
+            sock.sendto("speed 50".encode(encoding="utf-8"), tello_address)
+            time.sleep(2)
+            rectangle()
+            time.sleep(2)
+            sock.sendto("land".encode(encoding="utf-8"), tello_address)
+
+        if "circle" in msg:
+            sock.sendto('command'.encode(encoding="utf-8"), tello_address)
+            time.sleep(3)
+            sock.sendto('takeoff'.encode(encoding="utf-8"), tello_address)
+            time.sleep(4)
+            sock.sendto('curve 50 50 0 100 0 0 50'.encode(encoding="utf-8"), tello_address)
+            time.sleep(6)
+            rotate(180)
+            time.sleep(4)
+            sock.sendto('curve 50 50 0 100 0 0 50'.encode(encoding="utf-8"), tello_address)
+            time.sleep(6)
+            rotate(180)
 
         if 'end' in msg:
             print('...')
             sock.close()
             break
 
-        msg = msg.encode(encoding="utf-8")
-        sent = sock.sendto(msg, tello_address)
+        if "takeoff" in msg:
+            sock.sendto('takeoff'.encode(encoding="utf-8"), tello_address)
+
+        if "land" in msg:
+            sock.sendto(msg.encode(encoding="utf-8"), tello_address)
+
+        if "command" in msg:
+            sock.sendto('command'.encode(encoding="utf-8"), tello_address)
 
     except KeyboardInterrupt:
         print('\n . . .\n')
