@@ -1,2 +1,2 @@
-# Group-Project-3-Simple-Chat-Program
-Learn and simulate how two persons chatting in the chatting room. 
+# Group-Project-3-Tello-Drone-Project
+Command a drone using UDP connection, giving it pre-determined commands with python.
